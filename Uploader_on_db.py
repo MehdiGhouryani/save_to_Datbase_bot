@@ -1,45 +1,21 @@
 import sqlite3
 import os
-# from getPhoto import get_photo
+from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, filters , ContextTypes,Application
 
 
 
+load_dotenv()
+Token = os.getenv('token')
 
-
-
-
-
-# async def get_photo(update:Update , context:ContextTypes.DEFAULT_TYPE):
-
-#     print('is connetcting to Database ...')
-
-#     conn = sqlite3.connect(db_name)
-#     cursor = conn.cursor()    
-
-#     print('connected ..')
-
-#     pic=cursor.execute('SELECT photo FROM devices WHERE name="mri"').fetchone()[0]
-#     print(pic)
-#     chat_id = update.effective_chat.id
-#     print('pic is send')
-#     conn.close()  
-
-#     await context.bot.send_photo(chat_id=chat_id ,photo="AgACAgQAAxkBAAPYZk5TPsvY0dzyCarBN5ZHzlYAAZDmAAKlsjEbdH8kUtPqXTfF27XmAQADAgADdwADNQQ")  
-
-#     await update.message.reply_text("عکس ارسال شد")
-
+print(f"token is :   {Token}")
 
 user_info = {}
 
 
-
 db_name = 'medical_device.db'
 
-
-
-# bot_token = '6706433110:AAFU1vkHJlEP5qoBxwWrb2bhoNCl9WlAcVE'
 
 
 async def start(update:Update , context:ContextTypes.DEFAULT_TYPE):
@@ -274,7 +250,7 @@ async def photo_handler(update:Update , context:ContextTypes.DEFAULT_TYPE):
 
 
 def main():
-    app=Application.builder().token('6706433110:AAHBjDmqfHBt2Op3RUCiLwBRVJnl1TeDorQ').build()
+    app=Application.builder().token(Token).build()
     app.add_handler(CommandHandler('start', start))
     # app.add_handler(CommandHandler('dawnload', get_photo))
     app.add_handler(MessageHandler(filters.TEXT,message_handler))
