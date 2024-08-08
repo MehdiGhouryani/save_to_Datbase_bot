@@ -158,13 +158,14 @@ async def get_device_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     device_photo_binary = io.BytesIO()
     
     # دانلود عکس به صورت باینری
-    await photo_file.download_to_memory(device_photo_binary)
+    device_photo_binary = await photo_file.download_to_memory(device_photo_binary)
     
     # بازنشانی موقعیت فایل به ابتدای آن
     device_photo_binary.seek(0)
     
     print(f'Type of device_photo_binary: {type(device_photo_binary)}, Size: {device_photo_binary.getbuffer().nbytes} bytes')
-    user_info[chat_id]['state']= 'get_device_structure'
+    print(device_photo_binary)
+    # user_info[chat_id]['state']= 'get_device_structure'
     user_info[chat_id]['data']['device_photo'] = device_photo_binary
 
     device_name = user_info[chat_id]['data']['device_name'] 
@@ -198,7 +199,7 @@ async def save_to_db(name,definition,types,structure,operation,advantages_disadv
         )
     ''')
 
-    cursor.execute('INSERT INTO information (name,definition,types,structure,operation,advantages_disadvantages,safety,related_technologies,photo) VALUES (?,?,?,?,?,?,?,?,?)', (name, definition, types,structure,operation,advantages_disadvantages,safety,related_technologies, photo))
+    cursor.execute('INSERT INTO information(name,definition,types,structure,operation,advantages_disadvantages,safety,related_technologies,photo) VALUES (?,?,?,?,?,?,?,?,?)', (name, definition, types,structure,operation,advantages_disadvantages,safety,related_technologies, photo))
     connection.commit()
     connection.close()
 
