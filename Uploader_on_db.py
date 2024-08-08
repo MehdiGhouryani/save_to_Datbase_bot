@@ -3,12 +3,14 @@ import os
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, filters , ContextTypes,Application
-
-
+import io
+import logging
 
 load_dotenv()
 Token = os.getenv('token')
 
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s',level=logging.INFO)
 
 user_info = {}
 
@@ -36,8 +38,10 @@ async def get_device_name(update:Update , context:ContextTypes.DEFAULT_TYPE):
 
     user_info[chat_id]['state']= 'get_device_name'
     user_info[chat_id]['data']['device_name'] = device_name
+    print('name')
 
     await update.message.reply_text(':   تعریف دستگاه')
+
 
 
 
@@ -52,6 +56,7 @@ async def get_device_definition(update:Update , context:ContextTypes.DEFAULT_TYP
     user_info[chat_id]['state']= 'get_device_definition'
     user_info[chat_id]['data']['device_definition'] = device_definition
 
+    print('definiton')
 
     await update.message.reply_text(':   انواع دستگاه')
 
@@ -67,6 +72,7 @@ async def get_device_types(update:Update , context:ContextTypes.DEFAULT_TYPE):
     user_info[chat_id]['state']= 'get_device_types'
     user_info[chat_id]['data']['device_types'] = device_types
 
+    print('types')
     await update.message.reply_text(' :  ساختار و اجزا')
 
 
@@ -80,6 +86,7 @@ async def get_device_structure(update:Update , context:ContextTypes.DEFAULT_TYPE
     user_info[chat_id]['state']= 'get_device_structure'
     user_info[chat_id]['data']['device_structure'] = device_structure
 
+    print('structure')
     await update.message.reply_text(':   نحوه عملکرد')
 
 
@@ -93,6 +100,7 @@ async def get_device_operation(update:Update , context:ContextTypes.DEFAULT_TYPE
     user_info[chat_id]['state']= 'get_device_operation'
     user_info[chat_id]['data']['device_operation'] = device_operation
 
+    print('opration')
     await update.message.reply_text(':    مزایا و معایب')
 
 
@@ -106,6 +114,7 @@ async def get_device_advantages_disadvantages(update:Update , context:ContextTyp
     user_info[chat_id]['state']= 'get_device_advantages_disadvantages'
     user_info[chat_id]['data']['device_advantages_disadvantages'] = device_advantages_disadvantages
 
+    print('advantage')
     await update.message.reply_text(':   نکات ایمنی')
 
 
@@ -119,6 +128,7 @@ async def get_device_safety(update:Update , context:ContextTypes.DEFAULT_TYPE):
     user_info[chat_id]['state']= 'get_device_safety'
     user_info[chat_id]['data']['device_safety'] = device_safety
 
+    print('safety')
     await update.message.reply_text(':   تکنولوژی‌های مرتبط')
 
 
@@ -132,31 +142,34 @@ async def get_device_related_technologies(update:Update , context:ContextTypes.D
     user_info[chat_id]['state']= 'get_device_related_technologies'
     user_info[chat_id]['data']['device_related_technologies'] = device_related_technologies
 
+    print('technologies')
     await update.message.reply_text('عکس دستگاه را ارسال کنید.')
 
 
 
-
-async def get_device_photo(update:Update , context:ContextTypes.DEFAULT_TYPE):
+async def get_device_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     print('get_device_photo is Start')
-    global device_photo
+    global device_photo_binary
     photo = update.message.photo[-1]
-    photo_file = await context.bot.get_file(photo)
-    device_photo = os.path.join('images', photo_file.file_unique_id + '.jpg')  
-    print(type(device_photo),device_photo)
-    if not os.path.exists('images'):
-        os.makedirs('images')
-    with open(device_photo, 'wb') as f:
-        await photo_file.download_to_memory(f)
-
-
+    photo_file = await context.bot.get_file(photo.file_id)
+    
+    # ذخیره عکس به صورت باینری در متغیر
+    device_photo_binary = io.BytesIO()
+    
+    # دانلود عکس به صورت باینری
+    await photo_file.download_to_memory(device_photo_binary)
+    
+    # بازنشانی موقعیت فایل به ابتدای آن
+    device_photo_binary.seek(0)
+    
+    print(f'Type of device_photo_binary: {type(device_photo_binary)}, Size: {device_photo_binary.getbuffer().nbytes} bytes')
     user_info[chat_id]['state']= 'get_device_structure'
-    user_info[chat_id]['data']['device_photo'] = device_photo
+    user_info[chat_id]['data']['device_photo'] = device_photo_binary
 
     device_name = user_info[chat_id]['data']['device_name'] 
 
-    await save_to_db(device_name,device_definition, device_types,device_structure,device_operation,device_advantages_disadvantages,device_safety,device_related_technologies, device_photo)
+    await save_to_db(device_name,device_definition, device_types,device_structure,device_operation,device_advantages_disadvantages,device_safety,device_related_technologies, device_photo_binary)
 
     await update.message.reply_text('اطلاعات دستگاه با موفقیت ذخیره شد!')
 
@@ -170,19 +183,20 @@ async def save_to_db(name,definition,types,structure,operation,advantages_disadv
     connection = sqlite3.connect(db_name)
     cursor = connection.cursor()
 
-    cursor.execute('''CREATE TABLE IF NOT EXISTS devices (
-    
-    name TEXT,
-    definition TEXT,
-    types TEXT,
-    structure TEXT,
-    operation TEXT,
-    advantages_disadvantages TEXT,
-    safety TEXT,
-    related_technologies TEXT,
-
-    photo BLOB
-)''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS information (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            definition TEXT,
+            types TEXT,
+            structure TEXT,
+            operation TEXT,
+            advantages_disadvantages TEXT,
+            safety TEXT,
+            related_technologies TEXT,
+            photo BLOB
+        )
+    ''')
 
     cursor.execute('INSERT INTO devices (name,definition,types,structure,operation,advantages_disadvantages,safety,related_technologies,photo) VALUES (?,?,?,?,?,?,?,?,?)', (name, definition, types,structure,operation,advantages_disadvantages,safety,related_technologies, photo))
     connection.commit()
