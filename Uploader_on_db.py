@@ -162,13 +162,15 @@ async def get_device_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     device_photo_binary.seek(0)
     # print(f'Type of device_photo_binary: {type(device_photo_binary)}, Size: {device_photo_binary.getbuffer().nbytes} bytes')
-    print(device_photo_binary)
+    print(device_photo_binary.seek(0))
     # user_info[chat_id]['state']= 'get_device_structure'
+    photo_data=device_photo_binary.getvalue()
+    print(photo_data)
     user_info[chat_id]['data']['device_photo'] = device_photo_binary
 
     device_name = user_info[chat_id]['data']['device_name'] 
 
-    await save_to_db(device_name,device_definition, device_types,device_structure,device_operation,device_advantages_disadvantages,device_safety,device_related_technologies, device_photo_binary)
+    await save_to_db(device_name,device_definition, device_types,device_structure,device_operation,device_advantages_disadvantages,device_safety,device_related_technologies,photo_data)
 
     await update.message.reply_text('اطلاعات دستگاه با موفقیت ذخیره شد!')
 
@@ -176,7 +178,7 @@ async def get_device_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
-async def save_to_db(name,definition,types,structure,operation,advantages_disadvantages,safety,related_technologies, photo):
+async def save_to_db(name,definition,types,structure,operation,advantages_disadvantages,safety,related_technologies,photo_data):
     """ذخیره اطلاعات در پایگاه داده SQLite"""
     print('save to database is connected')
     connection = sqlite3.connect(db_name)
@@ -196,8 +198,9 @@ async def save_to_db(name,definition,types,structure,operation,advantages_disadv
             photo BLOB
         )
     ''')
+    
 
-    cursor.execute('INSERT INTO information(name,definition,types,structure,operation,advantages_disadvantages,safety,related_technologies,photo) VALUES (?,?,?,?,?,?,?,?,?)', (name, definition, types,structure,operation,advantages_disadvantages,safety,related_technologies, photo))
+    cursor.execute('INSERT INTO information(name,definition,types,structure,operation,advantages_disadvantages,safety,related_technologies,photo) VALUES (?,?,?,?,?,?,?,?,?)', (name, definition, types,structure,operation,advantages_disadvantages,safety,related_technologies,photo_data))
     connection.commit()
     connection.close()
 
