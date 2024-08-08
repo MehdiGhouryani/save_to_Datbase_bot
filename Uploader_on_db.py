@@ -160,7 +160,7 @@ async def get_device_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # دانلود عکس به صورت باینری
     await photo_file.download_to_memory(device_photo_binary)
     
-    
+    device_photo_binary.seek(0)
     # print(f'Type of device_photo_binary: {type(device_photo_binary)}, Size: {device_photo_binary.getbuffer().nbytes} bytes')
     print(device_photo_binary)
     # user_info[chat_id]['state']= 'get_device_structure'
