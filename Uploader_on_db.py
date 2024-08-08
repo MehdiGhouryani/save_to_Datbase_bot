@@ -158,7 +158,7 @@ async def get_device_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     device_photo_binary = io.BytesIO()
     
     # دانلود عکس به صورت باینری
-    device_photo_binary = await photo_file.download_to_memory(device_photo_binary)
+    await photo_file.download_to_memory(device_photo_binary)
     
     
     # print(f'Type of device_photo_binary: {type(device_photo_binary)}, Size: {device_photo_binary.getbuffer().nbytes} bytes')
