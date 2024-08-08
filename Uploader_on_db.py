@@ -198,7 +198,7 @@ async def save_to_db(name,definition,types,structure,operation,advantages_disadv
         )
     ''')
 
-    cursor.execute('INSERT INTO devices (name,definition,types,structure,operation,advantages_disadvantages,safety,related_technologies,photo) VALUES (?,?,?,?,?,?,?,?,?)', (name, definition, types,structure,operation,advantages_disadvantages,safety,related_technologies, photo))
+    cursor.execute('INSERT INTO information (name,definition,types,structure,operation,advantages_disadvantages,safety,related_technologies,photo) VALUES (?,?,?,?,?,?,?,?,?)', (name, definition, types,structure,operation,advantages_disadvantages,safety,related_technologies, photo))
     connection.commit()
     connection.close()
 
