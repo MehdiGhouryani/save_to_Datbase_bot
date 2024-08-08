@@ -9,7 +9,6 @@ from telegram.ext import CommandHandler, MessageHandler, filters , ContextTypes,
 load_dotenv()
 Token = os.getenv('token')
 
-print(f"token is :   {Token}")
 
 user_info = {}
 
